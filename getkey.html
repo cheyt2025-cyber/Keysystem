@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zaporium • Key</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0d0d0f;--card:#131316;--accent:#00c6ff;--green:#00ffaa;--text:#e0e0e0;--muted:#888}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{background:var(--card);max-width:420px;width:100%;border-radius:16px;padding:40px 32px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.6);border:1px solid #1f1f23}
+    h1{font-size:28px;font-weight:700;margin-bottom:8px;background:linear-gradient(90deg,#00c6ff,#00ffaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{color:var(--muted);font-size:15px;margin-bottom:32px}
+    .key{background:#0a0a0c;border:2px dashed var(--accent);border-radius:12px;padding:20px;font-size:26px;font-weight:600;letter-spacing:2px;margin:24px 0;color:var(--green)}
+    .btn{background:var(--accent);color:#000;border:none;padding:14px 40px;font-size:16px;font-weight:700;border-radius:12px;cursor:pointer;transition:0.2s}
+    .btn:hover{background:var(--green);transform:translateY(-2px)}
+    .socials{display:flex;justify-content:center;gap:24px;margin-top:32px;font-size:14px}
+    .socials a{color:var(--muted);text-decoration:none}
+    .socials a:hover{color:var(--accent)}
+    .footer{margin-top:40px;font-size:13px;color:#555}
+    .blocked{color:#ff5555;font-size:18px}
+    @media(max-width:480px){.card{padding:32px 24px}h1{font-size:24px}.key{font-size:22px}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>ZAPORIUM</h1>
+    <p class="subtitle">Your exclusive access key</p>
+    <div id="content">
+      <div class="key">Loading key...</div>
+    </div>
+    <div class="socials">
+      <a href="https://youtube.com/@scriptzap0" target="_blank">YouTube</a>
+      <a href="https://discord.gg/VFQpaEcy" target="_blank">Discord</a>
+      <a href="https://tiktok.com/@scriptzap0" target="_blank">TikTok</a>
+    </div>
+    <div class="footer">Key expires in 24 hours • Do not share</div>
+  </div>
+
+  <script>
+    const TOKEN = new URLSearchParams(location.search).get('t');
+    const CLAIMED = localStorage.getItem("zaporium_claimed") === "true";
+
+    if (!TOKEN || CLAIMED) {
+      document.getElementById("content").innerHTML = `
+        <div class="key blocked">Already claimed!</div>
+        <p style="margin:20px 0;color:#ff5555">Complete LootLabs again for a new key</p>
+      `;
+    } else {
+      fetch("https://raw.githubusercontent.com/cheyt2025-cyber/Key-system-/main/keys.txt")
+        .then(r => r.text())
+        .then(text => {
+          const all = text.split("\n").map(k => k.trim()).filter(k => k);
+          const used = Object.keys(localStorage).filter(k => k.startsWith("used_")).map(k => localStorage.getItem(k));
+          const available = all.filter(k => !used.includes(k));
+          if (available.length === 0) {
+            document.getElementById("content").innerHTML = `<div class="key blocked">No keys left<br>Join Discord</div>`;
+          } else {
+            const key = available[Math.floor(Math.random() * available.length)];
+            localStorage.setItem("zaporium_claimed", "true");
+            localStorage.setItem("used_"+key, key);
+            document.getElementById("content").innerHTML = `
+              <div class="key">${key}</div>
+              <button class="btn" onclick="navigator.clipboard.writeText('${key}').then(()=>alert('Copied!'))">COPY KEY</button>
+              <p style="margin:16px 0;color:var(--green)">Success! Use in Zaporium Hub</p>
+            `;
+          }
+        });
+    }
+  </script>
+</body>
+</html>
