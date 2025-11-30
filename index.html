@@ -59,12 +59,10 @@
   </div>
 
   <script>
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-    // PUT YOUR LOOTLABS / LINKVERTISE LINK HERE
-    const LOOT_LINK = "https://lootlabs.gg/YOUR_LINK_HERE"; // ← CHANGE THIS!
-    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    // YOUR REAL LOOTLABS LINK (already inserted)
+    const LOOT_LINK = "https://lootdest.org/s?6H1tcqgk";
 
-    const ALL_KEYS = [ /* your 100 keys - same as always */ 
+    const ALL_KEYS = [
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
       "ZAP-ULTRA77-LEGEND1-ALPHA9","ZAP-OMEGA99-SECRET0-HACK3R","ZAP-XMAS2025-GIFT01-VIP77",
@@ -159,12 +157,12 @@
       });
     }
 
-    // Continue button → opens LootLabs
+    // Continue button → opens your LootLabs link
     document.getElementById('continueBtn').onclick = () => window.open(LOOT_LINK, '_blank');
 
-    // Check if user came back from LootLabs (?newkey=true)
+    // If user came back from LootLabs → give new key instantly
     if (window.location.search.includes('newkey=true')) {
-      history.replaceState(null, null, window.location.pathname); // clean URL
+      history.replaceState(null, null, window.location.pathname);
       claimAndShowKey();
     }
 
