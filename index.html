@@ -47,7 +47,7 @@
         Click continue, pop-ups/ads may show and they can be annoying,<br>
         but they directly support the creators of this link.
       </p>
-      <button class="continue-btn" onclick="generateNewKey()">Continue</button>
+      <button class="continue-btn" id="continueBtn">Continue</button>
     </div>
 
     <div id="soldOut" class="hidden error-box">
@@ -59,7 +59,12 @@
   </div>
 
   <script>
-    const ALL_KEYS = [ /* your 100 keys here - same as before */ 
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    // PUT YOUR LOOTLABS / LINKVERTISE LINK HERE
+    const LOOT_LINK = "https://lootlabs.gg/YOUR_LINK_HERE"; // ← CHANGE THIS!
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+
+    const ALL_KEYS = [ /* your 100 keys - same as always */ 
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
       "ZAP-ULTRA77-LEGEND1-ALPHA9","ZAP-OMEGA99-SECRET0-HACK3R","ZAP-XMAS2025-GIFT01-VIP77",
@@ -102,8 +107,7 @@
     ];
 
     const STORAGE_KEY = 'zaporium_used_keys_final';
-    const DURATION = 24 * 60 * 60 * 1000; // 24 hours
-
+    const DURATION = 24 * 60 * 60 * 1000;
     let timer;
 
     function format(ms) {
@@ -125,39 +129,26 @@
       document.getElementById('timer').textContent = `Time left: ${format(left)}`;
     }
 
-    function claimKey() {
+    function claimAndShowKey() {
       let used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       const avail = ALL_KEYS.filter(k => !used.includes(k));
-      if (avail.length === 0) return null;
+      if (avail.length === 0) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('soldOut').classList.remove('hidden');
+        return;
+      }
       const key = avail[Math.floor(Math.random() * avail.length)];
       used.push(key);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(used));
-      return key;
-    }
-
-    function saveKey(key) {
       localStorage.setItem('myZaporiumKey', key);
       localStorage.setItem('keyGeneratedAt', Date.now().toString());
-    }
 
-    function generateNewKey() {
-      document.getElementById('expiredSection').classList.add('hidden');
-      document.getElementById('loading').classList.remove('hidden');
-      setTimeout(() => {
-        const k = claimKey();
-        if (k) {
-          saveKey(k);
-          document.getElementById('keyDisplay').textContent = k;
-          document.getElementById('loading').classList.add('hidden');
-          document.getElementById('keySection').classList.remove('hidden');
-          clearInterval(timer);
-          timer = setInterval(updateTimer, 1000);
-          updateTimer();
-        } else {
-          document.getElementById('loading').classList.add('hidden');
-          document.getElementById('soldOut').classList.remove('hidden');
-        }
-      }, 800);
+      document.getElementById('keyDisplay').textContent = key;
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('keySection').classList.remove('hidden');
+      clearInterval(timer);
+      timer = setInterval(updateTimer, 1000);
+      updateTimer();
     }
 
     function copyKey() {
@@ -168,7 +159,16 @@
       });
     }
 
-    // On load
+    // Continue button → opens LootLabs
+    document.getElementById('continueBtn').onclick = () => window.open(LOOT_LINK, '_blank');
+
+    // Check if user came back from LootLabs (?newkey=true)
+    if (window.location.search.includes('newkey=true')) {
+      history.replaceState(null, null, window.location.pathname); // clean URL
+      claimAndShowKey();
+    }
+
+    // Normal load
     const saved = localStorage.getItem('myZaporiumKey');
     const genTime = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
 
@@ -182,7 +182,7 @@
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('expiredSection').classList.remove('hidden');
     } else {
-      generateNewKey();
+      claimAndShowKey();
     }
   </script>
 </body>
