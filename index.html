@@ -7,7 +7,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
     body{margin:0;height:100vh;background:#000;color:#0ff;font-family:'Orbitron',sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .container{background:rgba(10,10,30,0.85);padding:40px 30px;border-radius:20px;text-align:center;box-shadow:0 0 30px #0ff;border:1px solid #0ff;max-width:90%}
+    .container{background:rgba(10,10,30,0.85);padding:40px 30px;border-radius:20px;text-align:center;box-shadow:0 0 30px #0ff;border:1px solid #0ff;max-width:90%;position:relative}
     h1{font-size:2.8rem;margin:0 0 10px;text-shadow:0 0 10px #0ff}
     .subtitle{color:#0ff;opacity:0.8;margin-bottom:30px}
     .key-box{background:#000;padding:20px;border:2px dashed #0ff;border-radius:12px;margin:20px 0;font-size:1.4rem;letter-spacing:2px;word-break:break-all}
@@ -17,6 +17,9 @@
     .links a{color:#0ff;margin:0 15px;text-decoration:none}
     .footer{margin-top:30px;font-size:0.9rem;opacity:0.7}
     .hidden{display:none}
+    #notify{position:absolute;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,255,255,0.15);color:#0ff;padding:12px 30px;border-radius:50px;border:1px solid #0ff;font-weight:bold;backdrop-filter:blur(10px);box-shadow:0 0 20px #0ff;opacity:0;transition:all .4s;pointer-events:none;z-index:100}
+    #notify.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .error-box{border-color:#f44;color:#fbb;background:#300;padding:20px;border-radius:12px;margin:20px 0}
   </style>
 </head>
 <body>
@@ -24,61 +27,79 @@
     <h1>ZAPORIUM</h1>
     <p class="subtitle">Your exclusive access key</p>
 
-    <div id="loading" class="key-box">Generating your personal key...</div>
+    <div id="loading" class="key-box">Checking availability...</div>
     <div id="keySection" class="hidden">
       <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
       <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
       <p class="success">Success! Use in Zaporium Hub</p>
-      <div class="links">
-        <a href="#">YouTube</a>
-        <a href="#">Discord</a>
-        <a href="#">TikTok</a>
-      </div>
+      <div class="links"><a href="#">YouTube</a><a href="#">Discord</a><a href="#">TikTok</a></div>
       <p class="footer">Key expires in 24 hours • Do not share</p>
     </div>
+    <div id="soldOut" class="hidden error-box">
+      <strong>All keys have been claimed.</strong><br><br>
+      Contact the owner for more keys or restock.
+    </div>
+    <div id="notify">Key copied successfully!</div>
   </div>
 
   <script>
-    // Big pool of real-looking keys (you can add thousands more if you want)
-    const keyPool = [
-      "ZAP-9X8K7-3N2P1-QW4E5",
-      "ZAP-7V6B5-N4M3L-K2J1H",
-      "ZAP-5T4R3-E2W1Q-A9S8D",
-      "ZAP-8F7G6-H5J4K-L3M2N",
-      "ZAP-1P2O3-I4U5Y-T6R7E",
-      "ZAP-XC123-VB456-NM789-LK321",
-      "ZAP-CHEYT-2025-WIN99",
-      "ZAP-VIP25-ELITE7-GOLD1",
-      // Add as many as you want here...
+    // YOUR KEY POOL — add as many as you want
+    const ALL_KEYS = [
+      "ZAP-9X8K7-3N2P1-QW4E5","ZAP-7V6B5-N4M3L-K2J1H","ZAP-5T4R3-E2W1Q-A9S8D",
+      "ZAP-CHEYT-2025-WIN99","ZAP-VIP25-ELITE7-GOLD1","ZAP-NEON-404X-CYBER9",
+      "ZAP-ULTRA-77777-LEGEND","ZAP-OMEGA-99999-ALPHA1","ZAP-SECRET-00000-HACK3R",
+      "ZAP-XMAS-2025-GIFT01","ZAP-CYBER-11111-PRO11","ZAP-FINAL-55555-OWNER"
+      // Add 1000+ more here if needed
     ];
 
-    function generateUniqueKey() {
-      const used = JSON.parse(localStorage.getItem('usedKeys') || '[]');
-      const available = keyPool.filter(k => !used.includes(k));
-      if (available.length === 0) return "ZAP-ALL-CLAIMED-99999";
-      const chosen = available[Math.floor(Math.random() * available.length)];
-      used.push(chosen);
-      localStorage.setItem('usedKeys', JSON.stringify(used));
-      localStorage.setItem('myZaporiumKey', chosen);
-      return chosen;
-    }
+    const STORAGE_KEY = 'zaporium_used_keys_v2'; // change only if you want to reset
 
-    function getSavedKey() {
-      return localStorage.getItem('myZaporiumKey');
+    async function claimKey() {
+      let used = [];
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) used = JSON.parse(saved);
+      } catch(e) { used = []; }
+
+      const available = ALL_KEYS.filter(k => !used.includes(k));
+
+      if (available.length === 0) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('soldOut').classList.remove('hidden');
+        return;
+      }
+
+      // Claim one randomly
+      const claimedKey = available[Math.floor(Math.random() * available.length)];
+      used.push(claimedKey);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(used));
+      localStorage.setItem('myZaporiumKey', claimedKey);
+
+      // Show key
+      document.getElementById('keyDisplay').textContent = claimedKey;
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('keySection').classList.remove('hidden');
     }
 
     function copyKey() {
-      navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent);
-      alert('Key copied!');
+      const key = document.getElementById('keyDisplay').textContent;
+      navigator.clipboard.writeText(key);
+      const n = document.getElementById('notify');
+      n.classList.add('show');
+      setTimeout(() => n.classList.remove('show'), 2000);
     }
 
-    // Main logic
-    let key = getSavedKey();
-    if (!key) key = generateUniqueKey();
-
-    document.getElementById('keyDisplay').textContent = key;
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('keySection').classList.remove('hidden');
+    // On load
+    const savedKey = localStorage.getItem('myZaporiumKey');
+    if (savedKey && ALL_KEYS.includes(savedKey)) {
+      // User already has a valid key → show it instantly
+      document.getElementById('keyDisplay').textContent = savedKey;
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('keySection').classList.remove('hidden');
+    } else {
+      // First time or invalid → try to claim a new one
+      claimKey();
+    }
   </script>
 </body>
 </html>
