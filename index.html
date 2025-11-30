@@ -17,9 +17,9 @@
     .links a{color:#0ff;margin:0 15px;text-decoration:none}
     .footer{margin-top:30px;font-size:0.9rem;opacity:0.7}
     .hidden{display:none}
-    #notify{position:absolute;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,255,255,0.15);color:#0ff;padding:12px 30px;border-radius:50px;border:1px solid #0ff;font-weight:bold;backdrop-filter:blur(10px);box-shadow:0 0 20px #0ff;opacity:0;transition:all .4s;pointer-events:none;z-index:100}
+    #notify{position:absolute;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,255,255,0.15);color:#0ff;padding:14px 36px;border-radius:50px;border:1px solid #0ff;font-weight:bold;backdrop-filter:blur(10px);box-shadow:0 0 20px #0ff;opacity:0;transition:all .4s;pointer-events:none;z-index:100}
     #notify.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    .error-box{border-color:#f44;color:#fbb;background:#300;padding:20px;border-radius:12px;margin:20px 0}
+    .error-box{border:2px dashed #f44;color:#fbb;background:#300;padding:25px;border-radius:12px;margin:20px 0}
   </style>
 </head>
 <body>
@@ -28,6 +28,7 @@
     <p class="subtitle">Your exclusive access key</p>
 
     <div id="loading" class="key-box">Checking availability...</div>
+    
     <div id="keySection" class="hidden">
       <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
       <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
@@ -35,69 +36,62 @@
       <div class="links"><a href="#">YouTube</a><a href="#">Discord</a><a href="#">TikTok</a></div>
       <p class="footer">Key expires in 24 hours • Do not share</p>
     </div>
+
     <div id="soldOut" class="hidden error-box">
       <strong>All keys have been claimed.</strong><br><br>
       Contact the owner for more keys or restock.
     </div>
+
     <div id="notify">Key copied successfully!</div>
   </div>
 
   <script>
-    // YOUR KEY POOL — add as many as you want
     const ALL_KEYS = [
       "ZAP-9X8K7-3N2P1-QW4E5","ZAP-7V6B5-N4M3L-K2J1H","ZAP-5T4R3-E2W1Q-A9S8D",
       "ZAP-CHEYT-2025-WIN99","ZAP-VIP25-ELITE7-GOLD1","ZAP-NEON-404X-CYBER9",
       "ZAP-ULTRA-77777-LEGEND","ZAP-OMEGA-99999-ALPHA1","ZAP-SECRET-00000-HACK3R",
       "ZAP-XMAS-2025-GIFT01","ZAP-CYBER-11111-PRO11","ZAP-FINAL-55555-OWNER"
-      // Add 1000+ more here if needed
     ];
 
-    const STORAGE_KEY = 'zaporium_used_keys_v2'; // change only if you want to reset
+    const STORAGE_KEY = 'zaporium_used_keys_v3';
 
-    async function claimKey() {
+    function claimKey() {
       let used = [];
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) used = JSON.parse(saved);
-      } catch(e) { used = []; }
+      try { used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) {}
 
       const available = ALL_KEYS.filter(k => !used.includes(k));
-
       if (available.length === 0) {
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('soldOut').classList.remove('hidden');
         return;
       }
 
-      // Claim one randomly
-      const claimedKey = available[Math.floor(Math.random() * available.length)];
-      used.push(claimedKey);
+      const key = available[Math.floor(Math.random() * available.length)];
+      used.push(key);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(used));
-      localStorage.setItem('myZaporiumKey', claimedKey);
+      localStorage.setItem('myZaporiumKey', key);
 
-      // Show key
-      document.getElementById('keyDisplay').textContent = claimedKey;
+      document.getElementById('keyDisplay').textContent = key;
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('keySection').classList.remove('hidden');
     }
 
     function copyKey() {
       const key = document.getElementById('keyDisplay').textContent;
-      navigator.clipboard.writeText(key);
-      const n = document.getElementById('notify');
-      n.classList.add('show');
-      setTimeout(() => n.classList.remove('show'), 2000);
+      navigator.clipboard.writeText(key).then(() => {
+        const n = document.getElementById('notify');
+        n.classList.add('show');
+        setTimeout(() => n.classList.remove('show'), 2200);
+      });
     }
 
-    // On load
-    const savedKey = localStorage.getItem('myZaporiumKey');
-    if (savedKey && ALL_KEYS.includes(savedKey)) {
-      // User already has a valid key → show it instantly
-      document.getElementById('keyDisplay').textContent = savedKey;
+    // Load or claim key
+    const saved = localStorage.getItem('myZaporiumKey');
+    if (saved && ALL_KEYS.includes(saved)) {
+      document.getElementById('keyDisplay').textContent = saved;
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('keySection').classList.remove('hidden');
     } else {
-      // First time or invalid → try to claim a new one
       claimKey();
     }
   </script>
