@@ -40,7 +40,7 @@
       <button class="continue-btn" id="continueBtn">Continue</button>
     </div>
 
-    <!-- Key Screen (valid key) -->
+    <!-- Key Screen (only when valid key exists) -->
     <div id="keyScreen" class="hidden">
       <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
       <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
@@ -59,8 +59,8 @@
   </div>
 
   <script>
-    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
-    const ALL_KEYS = [ /* your 100 keys - unchanged */ 
+    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq"; // Your working link
+    const ALL_KEYS = [
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
       "ZAP-ULTRA77-LEGEND1-ALPHA9","ZAP-OMEGA99-SECRET0-HACK3R","ZAP-XMAS2025-GIFT01-VIP77",
@@ -120,8 +120,7 @@
         clearInterval(timer);
         localStorage.removeItem('myZaporiumKey');
         localStorage.removeItem('keyGeneratedAt');
-        document.getElementById('keyScreen').classList.add('hidden');
-        document.getElementById('continueScreen').classList.remove('hidden');
+        showContinueScreen();
         return;
       }
       document.getElementById('timer').textContent = `Time left: ${format(left)}`;
@@ -142,10 +141,10 @@
     }
 
     function claimNewKey() {
-      let used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); // ← FIXED: JSON.parse not JSONP.parse
+      let used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); // ← FIXED: JSON.parse
       const available = ALL_KEYS.filter(k => !used.includes(k));
       if (available.length === 0) {
-        showContinueScreen();
+        document.getElementById('continueScreen').classList.add('hidden');
         document.getElementById('soldOut').classList.remove('hidden');
         return;
       }
@@ -165,15 +164,15 @@
       });
     }
 
-    document.getElementById('continue  document.getElementById('continueBtn').onclick = () => window.open(LOOT_LINK, '_blank');
+    document.getElementById('continueBtn').onclick = () => window.open(LOOT_LINK, '_blank');
 
-    // If redirected back from LootLabs
+    // User came back from LootLabs → give key
     if (window.location.search.includes('verified=true')) {
       history.replaceState(null, null, window.location.pathname);
       claimNewKey();
     }
 
-    // Main check
+    // MAIN LOGIC
     const savedKey = localStorage.getItem('myZaporiumKey');
     const genTime = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
 
