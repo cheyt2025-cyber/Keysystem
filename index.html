@@ -10,56 +10,47 @@
     .container{background:#111;padding:40px 20px;border-radius:8px;border:1px solid #333;text-align:center;max-width:90%;box-sizing:border-box}
     h1{font-size:2rem;margin:0 0 10px;color:#fff;font-weight:500}
     .subtitle{color:#ccc;margin-bottom:30px;font-size:1rem}
-    .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#fff}
-    .copy-btn{background:#007bff;color:#fff;border:none;padding:12px 30px;font-size:1rem;font-weight:500;border-radius:4px;cursor:pointer;margin:10px;transition:background .3s}
+    .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#0f0}
+    .copy-btn{background:#007bff;color:#fff;border:none;padding:12px 30px;font-size:1rem;border-radius:4px;cursor:pointer;margin:10px;transition:.3s}
     .copy-btn:hover{background:#0056b3}
-    .continue-btn{background:#fff;color:#000;border:none;padding:15px 40px;font-size:1.2rem;font-weight:500;border-radius:4px;cursor:pointer;margin:20px auto;display:block;width:80%;max-width:300px;transition:background .3s}
-    .continue-btn:hover{background:#f0f0f0}
-    .success{color:#28a745;margin:15px 0;font-size:1rem}
-    .timer{color:#007bff;font-size:1rem;margin:10px 0;font-weight:500}
-    .desc{color:#aaa;font-size:0.9rem;line-height:1.4;margin:20px 0}
-    .links a{color:#007bff;margin:0 10px;text-decoration:none;font-size:0.9rem}
-    .footer{margin-top:20px;font-size:0.8rem;color:#666}
+    .continue-btn{background:#333;color:#888;border:2px solid #444;padding:15px 40px;font-size:1.3rem;border-radius:6px;cursor:not-allowed;margin:20px auto;display:block;width:80%;max-width:320px;transition:.4s;pointer-events:none}
+    .continue-btn.active{background:#0f0;color:#000;cursor:pointer;pointer-events:all;border-color:#0f0}
+    .continue-btn.active:hover{background:#0c0}
+    .timer{color:#00ffff;font-size:1.1rem;margin:15px 0;font-weight:500}
+    .desc{color:#aaa;font-size:0.95rem;line-height:1.5;margin:25px 0}
+    .footer{margin-top:25px;font-size:0.8rem;color:#666}
     .hidden{display:none}
-    #notify{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:#007bff;color:#fff;padding:10px 20px;border-radius:4px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100}
+    #notify{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#007bff;color:#fff;padding:12px 24px;border-radius:6px;z-index:999;opacity:0;transition:.4s}
     #notify.show{opacity:1}
-    .error-box{border:1px solid #dc3545;color:#dc3545;background:#300;padding:20px;border-radius:4px;margin:20px 0}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>ZAPORIUM</h1>
-    <p class="subtitle">Your exclusive access key</p>
+    <p class="subtitle">Exclusive Access Key</p>
 
-    <!-- ONLY SHOWS WHEN NEED LOOTLABS (first time or expired) -->
     <div id="continueScreen">
       <p class="desc">
-        Click continue, pop-ups/ads may show and they can be annoying,<br>
-        but they directly support the creators of this link.
+        Click continue after the timer.<br>
+        A new tab will open — you can close it immediately.
       </p>
-      <button class="continue-btn" id="continueBtn">Continue</button>
+      <button class="continue-btn" id="continueBtn">Please wait 5...</button>
     </div>
 
-    <!-- ONLY SHOWS WHEN USER HAS VALID KEY -->
     <div id="keyScreen" class="hidden">
       <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
       <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
       <div id="timer" class="timer">Time left: 24:00:00</div>
-      <p class="success">Success! Use in Zaporium Hub</p>
-      <div class="links"><a href="#">YouTube</a><a href="#">Discord</a><a href="#">TikTok</a></div>
-      <p class="footer">Do not share</p>
+      <p style="color:#0f0;margin-top:20px">Success! Use this key in Zaporium Hub</p>
+      <p class="footer">Do not share your key • Expires in 24 hours</p>
     </div>
 
-    <div id="soldOut" class="hidden error-box">
-      <strong>All keys have been claimed.</strong><br><br>
-      Contact the owner for restock.
-    </div>
-
-    <div id="notify">Key copied successfully!</div>
+    <div id="notify">Key copied!</div>
   </div>
 
   <script>
-    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";  // Your current link
+    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
+
     const ALL_KEYS = [
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
@@ -102,86 +93,94 @@
       "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
     ];
 
-    const STORAGE_KEY = 'zaporium_used_keys_final';
-    const DURATION = 24 * 60 * 60 * 1000; // 24 hours
-    let timer;
+    const STORAGE_KEY = 'zaporium_used_keys_2025';
+    const DURATION = 24 * 60 * 60 * 1000;
+    let countdownInterval, timerInterval;
 
     function format(ms) {
-      let h = Math.floor(ms / 3600000).toString().padStart(2,'0');
-      let m = Math.floor((ms % 3600000) / 60000).toString().padStart(2,'0');
-      let s = Math.floor((ms % 60000) / 1000).toString().padStart(2,'0');
+      let h = Math.floor(ms/3600000).toString().padStart(2,'0');
+      let m = Math.floor((ms%3600000)/60000).toString().padStart(2,'0');
+      let s = Math.floor((ms%60000)/1000).toString().padStart(2,'0');
       return `${h}:${m}:${s}`;
     }
 
-    function updateTimer() {
-      const gen = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
-      const left = DURATION - (Date.now() - gen);
-      if (left <= 0) {
-        clearInterval(timer);
-        // PERMANENTLY DELETE EXPIRED KEY
-        localStorage.removeItem('myZaporiumKey');
-        localStorage.removeItem('keyGeneratedAt');
-        showContinueScreen();
-        return;
-      }
-      document.getElementById('timer').textContent = `Time left: ${format(left)}`;
-    }
-
     function copyKey() {
-      const key = document.getElementById('keyDisplay').textContent;
-      navigator.clipboard.writeText(key).then(() => {
-        const notify = document.getElementById('notify');
-        notify.classList.add('show');
-        setTimeout(() => notify.classList.remove('show'), 2000);
+      navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent).then(() => {
+        const n = document.getElementById('notify');
+        n.classList.add('show');
+        setTimeout(() => n.classList.remove('show'), 2000);
       });
     }
 
-    function showKeyScreen(key) {
+    function showKeyDashboard(key) {
       document.getElementById('keyDisplay').textContent = key;
       document.getElementById('continueScreen').classList.add('hidden');
       document.getElementById('keyScreen').classList.remove('hidden');
       localStorage.setItem('myZaporiumKey', key);
       localStorage.setItem('keyGeneratedAt', Date.now().toString());
-      clearInterval(timer);
-      timer = setInterval(updateTimer, 1000);
-      updateTimer();
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const left = DURATION - (Date.now() - parseInt(localStorage.getItem('keyGeneratedAt')));
+        if (left <= 0) {
+          clearInterval(timerInterval);
+          localStorage.removeItem('myZaporiumKey');
+          localStorage.removeItem('keyGeneratedAt');
+          location.reload();
+        } else {
+          document.getElementById('timer').textContent = 'Time left: ' + format(left);
+        }
+      }, 1000);
     }
 
-    function showContinueScreen() {
-      document.getElementById('keyScreen').classList.add('hidden');
-      document.getElementById('continueScreen').classList.remove('hidden');
+    function startContinueCountdown() {
+      let seconds = 5;
+      const btn = document.getElementById('continueBtn');
+      btn.textContent = `Please wait ${seconds}...`;
+
+      countdownInterval = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+          btn.textContent = `Please wait ${seconds}...`;
+        } else {
+          btn.textContent = 'Continue';
+          btn.classList.add('active');
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
     }
 
-    function claimNewKey() {
-      let used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');  // Fixed: JSONP.parse -> JSON.parse
+    function generateNewKey() {
+      let used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       const available = ALL_KEYS.filter(k => !used.includes(k));
       if (available.length === 0) {
-        document.getElementById('continueScreen').classList.add('hidden');
-        document.getElementById('soldOut').classList.remove('hidden');
+        alert('All keys claimed! Contact owner for restock.');
         return;
       }
       const newKey = available[Math.floor(Math.random() * available.length)];
       used.push(newKey);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(used));
-      showKeyScreen(newKey);
+      showKeyDashboard(newKey);
     }
 
-    // Auto-check on load
-    window.addEventListener('load', function() {
-      const savedKey = localStorage.getItem('myZaporiumKey');
-      const genTime = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
-      if (savedKey && (Date.now() - genTime < DURATION)) {
-        showKeyScreen(savedKey);
-      } else {
-        showContinueScreen();
-      }
+    document.getElementById('continueBtn').addEventListener('click', function () {
+      if (!this.classList.contains('active')) return;
+      window.open(LOOT_LINK, '_blank');
+      setTimeout(generateNewKey, 800);
     });
 
-    document.getElementById('continueBtn').addEventListener('click', function() {
-      // Redirect to ads
-      window.open(LOOT_LINK, '_blank');
-      // Generate key after "ads" (simulate delay)
-      setTimeout(claimNewKey, 2000);  // 2s delay for realism
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('myZaporiumKey');
+      const genTime = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
+
+      if (saved && (Date.now() - genTime < DURATION)) {
+        showKeyDashboard(saved);
+      } else {
+        localStorage.removeItem('myZaporiumKey');
+        localStorage.removeItem('keyGeneratedAt');
+        document.getElementById('continueScreen').classList.remove('hidden');
+        startContinueCountdown();
+      }
     });
   </script>
 </body>
