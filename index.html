@@ -31,7 +31,7 @@
     <h1>ZAPORIUM</h1>
     <p class="subtitle">Your exclusive access key</p>
 
-    <!-- ONLY SHOWS WHEN NEED LOOTLABS (first time or expired) -->
+    <!-- Continue Screen (first time / expired) -->
     <div id="continueScreen">
       <p class="desc">
         Click continue, pop-ups/ads may show and they can be annoying,<br>
@@ -40,7 +40,7 @@
       <button class="continue-btn" id="continueBtn">Continue</button>
     </div>
 
-    <!-- ONLY SHOWS WHEN USER HAS VALID KEY -->
+    <!-- Key Screen (valid key) -->
     <div id="keyScreen" class="hidden">
       <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
       <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
@@ -59,8 +59,8 @@
   </div>
 
   <script>
-    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";  // Your current link
-    const ALL_KEYS = [
+    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
+    const ALL_KEYS = [ /* your 100 keys - unchanged */ 
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
       "ZAP-ULTRA77-LEGEND1-ALPHA9","ZAP-OMEGA99-SECRET0-HACK3R","ZAP-XMAS2025-GIFT01-VIP77",
@@ -103,7 +103,7 @@
     ];
 
     const STORAGE_KEY = 'zaporium_used_keys_final';
-    const DURATION = 24 * 60 * 60 * 1000; // 24 hours
+    const DURATION = 24 * 60 * 60 * 1000;
     let timer;
 
     function format(ms) {
@@ -118,10 +118,10 @@
       const left = DURATION - (Date.now() - gen);
       if (left <= 0) {
         clearInterval(timer);
-        // PERMANENTLY DELETE EXPIRED KEY
         localStorage.removeItem('myZaporiumKey');
         localStorage.removeItem('keyGeneratedAt');
-        showContinueScreen();
+        document.getElementById('keyScreen').classList.add('hidden');
+        document.getElementById('continueScreen').classList.remove('hidden');
         return;
       }
       document.getElementById('timer').textContent = `Time left: ${format(left)}`;
@@ -142,10 +142,10 @@
     }
 
     function claimNewKey() {
-      let used = JSONP.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      let used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); // ← FIXED: JSON.parse not JSONP.parse
       const available = ALL_KEYS.filter(k => !used.includes(k));
       if (available.length === 0) {
-        document.getElementById('continueScreen').classList.add('hidden');
+        showContinueScreen();
         document.getElementById('soldOut').classList.remove('hidden');
         return;
       }
@@ -165,24 +165,21 @@
       });
     }
 
-    // Continue button
-    document.getElementById('continueBtn').onclick = () => window.open(LOOT_LINK, '_blank');
+    document.getElementById('continue  document.getElementById('continueBtn').onclick = () => window.open(LOOT_LINK, '_blank');
 
-    // If user came back from LootLabs → give new key
+    // If redirected back from LootLabs
     if (window.location.search.includes('verified=true')) {
       history.replaceState(null, null, window.location.pathname);
       claimNewKey();
     }
 
-    // MAIN LOGIC
+    // Main check
     const savedKey = localStorage.getItem('myZaporiumKey');
     const genTime = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
 
     if (savedKey && ALL_KEYS.includes(savedKey) && (Date.now() - genTime < DURATION)) {
-      // Valid key → show ONLY key screen
       showKeyScreen(savedKey);
     } else {
-      // Expired or no key → delete old data and show Continue
       localStorage.removeItem('myZaporiumKey');
       localStorage.removeItem('keyGeneratedAt');
       showContinueScreen();
