@@ -127,10 +127,21 @@
       document.getElementById('timer').textContent = `Time left: ${format(left)}`;
     }
 
+    function copyKey() {
+      const key = document.getElementById('keyDisplay').textContent;
+      navigator.clipboard.writeText(key).then(() => {
+        const notify = document.getElementById('notify');
+        notify.classList.add('show');
+        setTimeout(() => notify.classList.remove('show'), 2000);
+      });
+    }
+
     function showKeyScreen(key) {
       document.getElementById('keyDisplay').textContent = key;
       document.getElementById('continueScreen').classList.add('hidden');
       document.getElementById('keyScreen').classList.remove('hidden');
+      localStorage.setItem('myZaporiumKey', key);
+      localStorage.setItem('keyGeneratedAt', Date.now().toString());
       clearInterval(timer);
       timer = setInterval(updateTimer, 1000);
       updateTimer();
@@ -142,7 +153,7 @@
     }
 
     function claimNewKey() {
-      let used = JSONP.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      let used = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');  // Fixed: JSONP.parse -> JSON.parse
       const available = ALL_KEYS.filter(k => !used.includes(k));
       if (available.length === 0) {
         document.getElementById('continueScreen').classList.add('hidden');
@@ -152,41 +163,26 @@
       const newKey = available[Math.floor(Math.random() * available.length)];
       used.push(newKey);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(used));
-      localStorage.setItem('myZaporiumKey', newKey);
-      localStorage.setItem('keyGeneratedAt', Date.now().toString());
       showKeyScreen(newKey);
     }
 
-    function copyKey() {
-      navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent).then(() => {
-        const n = document.getElementById('notify');
-        n.classList.add('show');
-        setTimeout(() => n.classList.remove('show'), 2200);
-      });
-    }
+    // Auto-check on load
+    window.addEventListener('load', function() {
+      const savedKey = localStorage.getItem('myZaporiumKey');
+      const genTime = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
+      if (savedKey && (Date.now() - genTime < DURATION)) {
+        showKeyScreen(savedKey);
+      } else {
+        showContinueScreen();
+      }
+    });
 
-    // Continue button
-    document.getElementById('continueBtn').onclick = () => window.open(LOOT_LINK, '_blank');
-
-    // If user came back from LootLabs → give new key
-    if (window.location.search.includes('verified=true')) {
-      history.replaceState(null, null, window.location.pathname);
-      claimNewKey();
-    }
-
-    // MAIN LOGIC
-    const savedKey = localStorage.getItem('myZaporiumKey');
-    const genTime = parseInt(localStorage.getItem('keyGeneratedAt') || '0');
-
-    if (savedKey && ALL_KEYS.includes(savedKey) && (Date.now() - genTime < DURATION)) {
-      // Valid key → show ONLY key screen
-      showKeyScreen(savedKey);
-    } else {
-      // Expired or no key → delete old data and show Continue
-      localStorage.removeItem('myZaporiumKey');
-      localStorage.removeItem('keyGeneratedAt');
-      showContinueScreen();
-    }
+    document.getElementById('continueBtn').addEventListener('click', function() {
+      // Redirect to ads
+      window.open(LOOT_LINK, '_blank');
+      // Generate key after "ads" (simulate delay)
+      setTimeout(claimNewKey, 2000);  // 2s delay for realism
+    });
   </script>
 </body>
 </html>
