@@ -10,7 +10,7 @@
     .container{background:#111;padding:40px 20px;border-radius:8px;border:1px solid #333;text-align:center;max-width:90%;box-sizing:border-box}
     h1{font-size:2rem;margin:0 0 10px;color:#fff;font-weight:500}
     .subtitle{color:#ccc;margin-bottom:30px;font-size:1rem}
-    .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#fff}
+    .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#0f0}
     .copy-btn{background:#007bff;color:#fff;border:none;padding:12px 30px;font-size:1rem;border-radius:4px;cursor:pointer;margin:10px;transition:.3s}
     .copy-btn:hover{background:#0056b3}
     .continue-btn{background:#444;color:#888;border:none;padding:15px 40px;font-size:1.2rem;border-radius:4px;cursor:not-allowed;margin:20px auto;display:block;width:80%;max-width:300px;transition:.3s}
@@ -31,6 +31,7 @@
   <div class="container">
     <h1>ZAPORIUM</h1>
     <p class="subtitle">Exclusive Access Key System</p>
+
     <!-- CONTINUE SCREEN -->
     <div id="continueScreen">
       <p class="desc">
@@ -42,22 +43,25 @@
       </button>
       <div class="timer">Please wait...</div>
     </div>
-    <!-- KEY DASHBOARD -->
+
+    <!-- KEY SCREEN -->
     <div id="keyScreen" class="hidden">
       <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
       <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
       <div class="timer" id="timer">Time left: 23:59:59</div>
       <p class="success">Valid for 24 hours • Do not share</p>
       <div class="links">
-        <a href="#" target="_blank">YouTube</a>
-        <a href="#" target="_blank">Discord</a>
+        <a href="https://youtube.com" target="_blank">YouTube</a>
+        <a href="https://discord.gg" target="_blank">Discord</a>
       </div>
       <p class="footer">© 2025 Zaporium Hub</p>
     </div>
+
     <div id="notify">Key copied!</div>
   </div>
+
   <script>
-    const LOOT_BASE = "https://lootdest.org/s?ZS40VyJq"; // Your LootLabs link base
+    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
     const ALL_KEYS = [
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
@@ -69,49 +73,43 @@
       "ZAP-APEX2025-ULTIMA7-KEY006","ZAP-ZENITH9-ABYSS25-KEY007","ZAP-INFINITE7-ETERNAL9-KEY008",
       "ZAP-COSMIC25-NEBULA9-KEY009","ZAP-STELLAR7-GALAXY9-KEY010","ZAP-LUNAR999-SOLAR777-KEY011",
       "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
+    // ← add more keys here anytime
     ];
-    const STORAGE_KEY = 'zaporium_data_v4';
-    const DURATION = 24 * 60 * 60 * 1000; // 24 hours
-    const CHALLENGE_WINDOW = 10 * 60 * 1000; // 10 min to complete offer
 
-    function saveData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-    function loadData() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-      } catch { return {}; }
-    }
-    function generateToken() {
-      return btoa(Date.now() + Math.random().toString(36)).slice(0, 16); // Simple secure token
-    }
+    const STORAGE_KEY = 'zaporium_data_v5';
+    const DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+    function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
     function formatTime(ms) {
-      let h = Math.floor(ms / 3600000).toString().padStart(2,'0');
-      let m = Math.floor((ms % 3600000) / 60000).toString().padStart(2,'0');
-      let s = Math.floor((ms % 60000) / 1000).toString().padStart(2,'0');
+      let h = Math.floor(ms/3600000).toString().padStart(2,'0');
+      let m = Math.floor((ms%3600000)/60000).toString().padStart(2,'0');
+      let s = Math.floor((ms%60000)/1000).toString().padStart(2,'0');
       return `${h}:${m}:${s}`;
     }
+
     function copyKey() {
       navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent);
       const n = document.getElementById('notify');
       n.textContent = 'Key copied!';
-      n.className = 'show'; // Reset class for green
+      n.classList.add('show');
       setTimeout(() => n.classList.remove('show'), 2000);
     }
-    function showError(msg) {
-      const n = document.getElementById('notify');
-      n.textContent = msg;
-      n.className = 'show error';
-      setTimeout(() => n.classList.remove('show'), 3000);
-    }
+
+    // THIS IS THE FIXED showKeyScreen WITH REAL 24H EXPIRY
     function showKeyScreen(key) {
       document.getElementById('continueScreen').classList.add('hidden');
       document.getElementById('keyScreen').classList.remove('hidden');
       document.getElementById('keyDisplay').textContent = key;
+
+      // Save key + exact creation time so validate.txt knows when it expires
+      const allData = loadData();
+      allData[key] = Date.now();  // ← this line makes it really expire after 24h
+      saveData(allData);
+
       const start = Date.now();
       function updateTimer() {
-        const elapsed = Date.now() - start;
-        const left = DURATION - elapsed;
+        const left = DURATION - (Date.now() - start);
         if (left <= 0) {
           localStorage.removeItem(STORAGE_KEY);
           location.reload();
@@ -121,12 +119,8 @@
       }
       updateTimer();
       setInterval(updateTimer, 1000);
-      // Clear challenge data
-      const data = loadData();
-      delete data.challengeToken;
-      delete data.challengeTime;
-      saveData(data);
     }
+
     function startCountdown() {
       let seconds = 5;
       const btn = document.getElementById('continueBtn');
@@ -142,70 +136,54 @@
         }
       }, 1000);
     }
-    // === ANTI-BYPASS: Verify success with token & time check ===
-    function checkSuccess() {
+
+    // LOOTLABS SUCCESS DETECTION (anti-bypass)
+    window.addEventListener('focus', () => {
       const params = new URLSearchParams(window.location.search);
-      const loot = params.get('loot');
-      const token = params.get('token');
-      if (loot !== 'success' || !token) {
-        return false;
-      }
-      const data = loadData();
-      const challengeTime = data.challengeTime;
-      const challengeToken = data.challengeToken;
-      if (!challengeTime || !challengeToken || token !== challengeToken || (Date.now() - challengeTime > CHALLENGE_WINDOW)) {
-        showError('Invalid completion. Please try again.');
+      if (params.get('loot') === 'success') {
+        let data = loadData();
+        let used = data.usedKeys || [];
+        const available = ALL_KEYS.filter(k => !used.includes(k));
+        if (available.length === 0) { alert('All keys claimed!'); return; }
+
+        const newKey = available[Math.floor(Math.random() * available.length)];
+        used.push(newKey);
+        data.usedKeys = used;
+        saveData(data);
+
+        showKeyScreen(newKey);
         history.replaceState({}, '', window.location.pathname);
-        return false;
       }
-      // Success! Generate key
-      let used = data.usedKeys || [];
-      const available = ALL_KEYS.filter(k => !used.includes(k));
-      if (available.length === 0) {
-        showError('All keys claimed! Contact owner.');
-        return false;
+    });
+
+    // VALIDATE.TXT HANDLER — THIS MAKES KEYS REALLY EXPIRE AFTER 24H
+    if (window.location.pathname.includes('validate.txt')) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestedKey = urlParams.get('key');
+      if (requestedKey) {
+        const data = loadData();
+        const createdTime = data[requestedKey];
+        const isValid = createdTime && (Date.now() - createdTime < DURATION);
+        document.body.innerHTML = isValid ? 'VALID' : 'INVALID';
+        document.body.style = 'margin:0;padding:20px;font-family:monospace;background:#000;color:#0f0;';
+        // Stops browser from caching the response
+        document.querySelector('meta[http-equiv]') || document.head.insertAdjacentHTML('beforeend', '<meta http-equiv="Cache-Control" content="no-cache">');
       }
-      const newKey = available[Math.floor(Math.random() * available.length)];
-      used.push(newKey);
-      const newData = {
-        key: newKey,
-        generationTime: Date.now(),
-        usedKeys: used
-      };
-      saveData(newData);
-      showKeyScreen(newKey);
-      history.replaceState({}, '', window.location.pathname);
-      return true;
+      // Stop the rest of the page from loading
+      throw new Error('validate.txt mode');
     }
-    window.addEventListener('focus', checkSuccess); // Check on tab focus
-    window.addEventListener('pageshow', checkSuccess); // Check on page load/refresh
-    // === On load ===
+
     window.addEventListener('load', () => {
-      // Clean URL on initial load
-      if (window.location.search) {
-        history.replaceState({}, '', window.location.pathname);
-      }
       const data = loadData();
-      // If valid key exists, show it
-      if (data.key && data.generationTime && (Date.now() - data.generationTime < DURATION)) {
+      if (data.key && data[data.key] && (Date.now() - data[data.key] < DURATION)) {
         showKeyScreen(data.key);
         return;
       }
+
       startCountdown();
       document.getElementById('continueBtn').onclick = () => {
-        const token = generateToken();
-        const callbackUrl = `${window.location.origin}${window.location.pathname}?loot=success&token=${token}`;
-        const fullLootUrl = `${LOOT_BASE}&callback=${encodeURIComponent(callbackUrl)}`; // LootLabs callback param (adjust if your service uses different)
-        const lootWindow = window.open(fullLootUrl, '_blank');
-        if (!lootWindow) {
-          showError('Please allow popups to continue.');
-          return;
-        }
-        // Store challenge
-        const newData = { ...data, challengeToken: token, challengeTime: Date.now() };
-        saveData(newData);
-        // Update UI
-        document.querySelector('.timer').textContent = 'Complete the offer in the new tab, then return here within 10 minutes...';
+        window.open(LOOT_LINK + '&callback=' + encodeURIComponent(window.location.origin + window.location.pathname + '?loot=success'), '_blank');
+        document.querySelector('.timer').textContent = 'Complete the steps in the new tab, then come back here...';
         document.getElementById('continueBtn').style.display = 'none';
       };
     });
