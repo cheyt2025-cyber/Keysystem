@@ -142,24 +142,21 @@
             "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
         ];
         const STORAGE_KEY = 'zaporium_data_v2';
-        const DURATION = 24 * 60 * 60 * 1000;
+        const DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
         function saveData(data) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
-
         function loadData() {
             try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
             catch { return {}; }
         }
-
         function formatTime(ms) {
             let h = Math.floor(ms / 3600000).toString().padStart(2,'0');
             let m = Math.floor((ms % 3600000) / 60000).toString().padStart(2,'0');
             let s = Math.floor((ms % 60000) / 1000).toString().padStart(2,'0');
             return `${h}:${m}:${s}`;
         }
-
         function copyKey() {
             navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent);
             const n = document.getElementById('notify');
@@ -172,12 +169,9 @@
             document.getElementById('keyScreen').classList.remove('hidden');
             document.getElementById('keyDisplay').textContent = key;
 
-            const data = loadData();
-            const start = data.generationTime || Date.now();
-
+            const start = loadData().generationTime || Date.now();
             function updateTimer() {
-                const elapsed = Date.now() - start;
-                const left = DURATION - elapsed;
+                const left = DURATION - (Date.now() - start);
                 if (left <= 0) {
                     localStorage.removeItem(STORAGE_KEY);
                     location.reload();
@@ -189,10 +183,34 @@
             setInterval(updateTimer, 1000);
         }
 
+        function generateAndShowKey() {
+            let data = loadData();
+            let used = data.usedKeys || [];
+            const available = ALL_KEYS.filter(k => !used.includes(k));
+
+            if (available.length === 0) {
+                alert('All keys have been claimed! Contact the owner for more.');
+                return;
+            }
+
+            const newKey = available[Math.floor(Math.random() * available.length)];
+            used.push(newKey);
+
+            const newData = {
+                key: newKey,
+                generationTime: Date.now(),
+                usedKeys: used
+            };
+            saveData(newData);
+            showKeyScreen(newKey);
+        }
+
+        // Countdown timer
         function startCountdown() {
             let seconds = 5;
             const btn = document.getElementById('continueBtn');
             const counter = document.getElementById('countdown');
+
             const timer = setInterval(() => {
                 seconds--;
                 counter.textContent = seconds;
@@ -200,34 +218,32 @@
                     clearInterval(timer);
                     btn.classList.add('active');
                     btn.disabled = false;
-                    btn.innerHTML = 'Continue →';
+                    btn.textContent = 'Continue →';
                 }
             }, 1000);
         }
 
         window.addEventListener('load', () => {
             const data = loadData();
+
+            // If user already has a valid key → show it immediately
             if (data.key && data.generationTime && (Date.now() - data.generationTime < DURATION)) {
                 showKeyScreen(data.key);
                 return;
             }
 
+            // Otherwise show countdown
             startCountdown();
+
+            // When user clicks Continue
             document.getElementById('continueBtn').onclick = () => {
+                if (!document.getElementById('continueBtn').classList.contains('active')) return;
+
+                // Open LootLabs in new tab
                 window.open(LOOT_LINK, '_blank');
-                setTimeout(() => {
-                    let used = data.usedKeys || [];
-                    const available = ALL_KEYS.filter(k => !used.includes(k));
-                    if (available.length === 0) {
-                        alert('All keys claimed! Contact owner.');
-                        return;
-                    }
-                    const newKey = available[Math.floor(Math.random() * available.length)];
-                    used.push(newKey);
-                    const newData = { key: newKey, generationTime: Date.now(), usedKeys: used };
-                    saveData(newData);
-                    showKeyScreen(newKey);
-                }, 3000);
+
+                // Immediately generate and show key in current tab
+                generateAndShowKey();
             };
         });
     </script>
