@@ -1,181 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Zaporium Key</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500&display=swap');
-    body{margin:0;height:100vh;background:#000;color:#fff;font-family:'Orbitron',sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .container{background:#111;padding:40px 20px;border-radius:8px;border:1px solid #333;text-align:center;max-width:90%;box-sizing:border-box}
-    h1{font-size:2rem;margin:0 0 10px;color:#fff;font-weight:500}
-    .subtitle{color:#ccc;margin-bottom:30px;font-size:1rem}
-    .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#0f0}
-    .copy-btn{background:#007bff;color:#fff;border:none;padding:12px 30px;font-size:1rem;border-radius:4px;cursor:pointer;margin:10px;transition:.3s}
-    .copy-btn:hover{background:#0056b3}
-    .continue-btn{background:#444;color:#888;border:none;padding:15px 40px;font-size:1.2rem;border-radius:4px;cursor:not-allowed;margin:20px auto;display:block;width:80%;max-width:300px;transition:.3s}
-    .continue-btn.active{background:#ffffff;color:#000;cursor:pointer;font-weight:bold}
-    .continue-btn.active:hover{background:#e0e0e0}
-    .timer{color:#fff;font-size:1.1rem;margin:15px 0;font-weight:bold}
-    .success{color:#aaa;margin:15px 0}
-    .desc{color:#aaa;font-size:0.9rem;line-height:1.4;margin:20px 0}
-    .links a{color:#007bff;margin:0 10px;text-decoration:none;font-size:0.9rem}
-    .footer{margin-top:20px;font-size:0.8rem;color:#666}
-    .hidden{display:none}
-    #notify{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#007bff;color:#fff;padding:12px 25px;border-radius:6px;z-index:9999;opacity:0;transition:opacity .4s}
-    #notify.show{opacity:1}
-    #notify.error{background:#dc3545}
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Zaporium Key</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500&display=swap');
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #000;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .container {
+            background: #111;
+            padding: 40px 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+        h1 { font-size: 2rem; margin: 0 0 10px; font-weight: 500; }
+        .subtitle { color: #ccc; margin-bottom: 30px; font-size: 1rem; }
+        .key-box {
+            background: #222;
+            padding: 15px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            word-break: break-all;
+            color: #fff;
+        }
+        .copy-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            transition: .3s;
+        }
+        .copy-btn:hover { background: #0056b3; }
+        .continue-btn {
+            background: #444;
+            color: #888;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: not-allowed;
+            margin: 20px auto;
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            transition: .3s;
+        }
+        .continue-btn.active {
+            background: #fff;
+            color: #000;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .continue-btn.active:hover { background: #e0e0e0; }
+        .timer { color: #fff; font-size: 1.1rem; margin: 15px 0; font-weight: bold; }
+        .success { color: #aaa; margin: 15px 0; }
+        .desc { color: #aaa; font-size: 0.9rem; line-height: 1.4; margin: 20px 0; }
+        .links a { color: #007bff; margin: 0 10px; text-decoration: none; font-size: 0.9rem; }
+        .footer { margin-top: 20px; font-size: 0.8rem; color: #666; }
+        .hidden { display: none; }
+        #notify {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #007bff;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 6px;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity .4s;
+        }
+        #notify.show { opacity: 1; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>ZAPORIUM</h1>
-    <p class="subtitle">Exclusive Access Key System</p>
+    <div class="container">
+        <h1>ZAPORIUM</h1>
+        <p class="subtitle">Exclusive Access Key System</p>
 
-    <div id="continueScreen">
-      <p class="desc">
-        Click continue after the timer.<br>
-        Ads may appear — they support the project.
-      </p>
-      <button class="continue-btn" id="continueBtn" disabled>
-        Continue (<span id="countdown">5</span>s)
-      </button>
-      <div class="timer">Please wait...</div>
+        <!-- CONTINUE SCREEN -->
+        <div id="continueScreen">
+            <p class="desc">
+                Click continue after the timer.<br>
+                Ads may appear — they support the project.
+            </p>
+            <button class="continue-btn" id="continueBtn" disabled>
+                Continue (<span id="countdown">5</span>s)
+            </button>
+            <div class="timer">Please wait...</div>
+        </div>
+
+        <!-- KEY DASHBOARD -->
+        <div id="keyScreen" class="hidden">
+            <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
+            <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
+            <div class="timer" id="timer">Time left: 23:59:59</div>
+            <p class="success">Valid for 24 hours • Do not share</p>
+            <div class="links">
+                <a href="#" target="_blank">YouTube</a>
+                <a href="#" target="_blank">Discord</a>
+            </div>
+            <p class="footer">© 2025 Zaporium Hub</p>
+        </div>
+
+        <div id="notify">Key copied!</div>
     </div>
 
-    <div id="keyScreen" class="hidden">
-      <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
-      <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
-      <div class="timer" id="timer">Time left: 23:59:59</div>
-      <p class="success">Valid for 24 hours • Do not share</p>
-      <div class="links">
-        <a href="https://youtube.com/@yourchannel" target="_blank">YouTube</a>
-        <a href="https://discord.gg/yourinvite" target="_blank">Discord</a>
-      </div>
-      <p class="footer">© 2025 Zaporium Hub</p>
-    </div>
+    <script>
+        const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
+        const ALL_KEYS = [
+            "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
+            "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
+            "ZAP-ULTRA77-LEGEND1-ALPHA9","ZAP-OMEGA99-SECRET0-HACK3R","ZAP-XMAS2025-GIFT01-VIP77",
+            "ZAP-CYBER111-PROMAX9-KEY001","ZAP-FINAL555-OWNER77-2025X","ZAP-GLOW999-NIGHTX-CORE77",
+            "ZAP-ICE777-FIRE999-VOID001","ZAP-QUANTUM25-REALM9-KEY002","ZAP-ETHEREAL-GLITCH7-NOVA25",
+            "ZAP-VOID888-PULSE9-STAR001","ZAP-CRYPTIC7-MYSTIC9-KEY003","ZAP-ORACLE25-LEGACY7-ELITE9",
+            "ZAP-PHOENIX9-REBORN25-KEY004","ZAP-SHADOWX-LIGHT9-CORE002","ZAP-TITAN777-MEGA9-KEY005",
+            "ZAP-APEX2025-ULTIMA7-KEY006","ZAP-ZENITH9-ABYSS25-KEY007","ZAP-INFINITE7-ETERNAL9-KEY008",
+            "ZAP-COSMIC25-NEBULA9-KEY009","ZAP-STELLAR7-GALAXY9-KEY010","ZAP-LUNAR999-SOLAR777-KEY011",
+            "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
+        ];
+        const STORAGE_KEY = 'zaporium_data_v2';
+        const DURATION = 24 * 60 * 60 * 1000;
 
-    <div id="notify">Key copied!</div>
-  </div>
-
-  <script>
-    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq"; // ← your loot link
-    const ALL_KEYS = [
-      "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
-      "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
-      "ZAP-ULTRA77-LEGEND1-ALPHA9","ZAP-OMEGA99-SECRET0-HACK3R","ZAP-XMAS2025-GIFT01-VIP77",
-      "ZAP-CYBER111-PROMAX9-KEY001","ZAP-FINAL555-OWNER77-2025X","ZAP-GLOW999-NIGHTX-CORE77",
-      "ZAP-ICE777-FIRE999-VOID001","ZAP-QUANTUM25-REALM9-KEY002","ZAP-ETHEREAL-GLITCH7-NOVA25",
-      "ZAP-VOID888-PULSE9-STAR001","ZAP-CRYPTIC7-MYSTIC9-KEY003","ZAP-ORACLE25-LEGACY7-ELITE9",
-      "ZAP-PHOENIX9-REBORN25-KEY004","ZAP-SHADOWX-LIGHT9-CORE002","ZAP-TITAN777-MEGA9-KEY005",
-      "ZAP-APEX2025-ULTIMA7-KEY006","ZAP-ZENITH9-ABYSS25-KEY007","ZAP-INFINITE7-ETERNAL9-KEY008",
-      "ZAP-COSMIC25-NEBULA9-KEY009","ZAP-STELLAR7-GALAXY9-KEY010","ZAP-LUNAR999-SOLAR777-KEY011",
-      "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
-    ];
-
-    const STORAGE_KEY = 'zaporium_data_v6';
-    const DURATION = 24 * 60 * 60 * 1000;
-
-    function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
-    function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
-    function formatTime(ms) {
-      let h = Math.floor(ms/3600000).toString().padStart(2,'0');
-      let m = Math.floor((ms%3600000)/60000).toString().padStart(2,'0');
-      let s = Math.floor((ms%60000)/1000).toString().padStart(2,'0');
-      return `${h}:${m}:${s}`;
-    }
-
-    function copyKey() {
-      navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent);
-      const n = document.getElementById('notify');
-      n.textContent = 'Key copied!';
-      n.classList.add('show');
-      setTimeout(() => n.classList.remove('show'), 2000);
-    }
-
-    function showKeyScreen(key) {
-      document.getElementById('continueScreen').classList.add('hidden');
-      document.getElementById('keyScreen').classList.remove('hidden');
-      document.getElementById('keyDisplay').textContent = key;
-
-      const data = loadData();
-      data[key] = Date.now(); // save exact creation time
-      data.lastKey = key;
-      saveData(data);
-
-      const start = Date.now();
-      const timer = () => {
-        const left = DURATION - (Date.now() - start);
-        if (left <= 0) { localStorage.removeItem(STORAGE_KEY); location.reload(); return; }
-        document.getElementById('timer').textContent = 'Time left: ' + formatTime(left);
-      };
-      timer();
-      setInterval(timer, 1000);
-    }
-
-    function startCountdown() {
-      let sec = 5;
-      const btn = document.getElementById('continueBtn');
-      const cnt = document.getElementById('countdown');
-      const int = setInterval(() => {
-        sec--;
-        cnt.textContent = sec;
-        if (sec <= 0) {
-          clearInterval(int);
-          btn.classList.add('active');
-          btn.disabled = false;
-          btn.innerHTML = 'Continue →';
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
-      }, 1000);
-    }
 
-    // THIS FIXES THE "CONTINUE AGAIN" BUG
-    document.getElementById('continueBtn').onclick = () => {
-      const callback = location.origin + location.pathname + '?loot=success';
-      const lootUrl = LOOT_LINK + '&callback=' + encodeURIComponent(callback);
-      window.open(lootUrl, '_blank');
+        function loadData() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+            catch { return {}; }
+        }
 
-      document.querySelector('.timer').textContent = 'Finish all offers in the new tab, then come back here...';
-      document.getElementById('continueBtn').style.display = 'none';
-    };
+        function formatTime(ms) {
+            let h = Math.floor(ms / 3600000).toString().padStart(2,'0');
+            let m = Math.floor((ms % 3600000) / 60000).toString().padStart(2,'0');
+            let s = Math.floor((ms % 60000) / 1000).toString().padStart(2,'0');
+            return `${h}:${m}:${s}`;
+        }
 
-    // AUTO GIVE KEY WHEN USER COMES BACK FROM LOOTLABS
-    if (location.search.includes('loot=success')) {
-      const data = loadData();
-      let used = data.usedKeys || [];
-      const available = ALL_KEYS.filter(k => !used.includes(k));
-      if (available.length > 0) {
-        const key = available[Math.floor(Math.random() * available.length)];
-        used.push(key);
-        data.usedKeys = used;
-        saveData(data);
-        showKeyScreen(key);
-      }
-      history.replaceState({}, '', location.pathname); // clean URL
-    }
+        function copyKey() {
+            navigator.clipboard.writeText(document.getElementById('keyDisplay').textContent);
+            const n = document.getElementById('notify');
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 2000);
+        }
 
-    // 24-HOUR VALIDATION FOR LOADER.LUA
-    if (location.pathname.includes('validate.txt')) {
-      const key = new URLSearchParams(location.search).get('key');
-      if (key) {
-        const data = loadData();
-        const time = data[key];
-        const valid = time && (Date.now() - time < DURATION);
-        document.body.innerHTML = valid ? 'VALID' : 'INVALID';
-        document.body.style = 'margin:0;padding:20px;font-family:monospace;background:#000;color:#0f0;';
-      }
-      throw ''; // stop normal page
-    }
+        function showKeyScreen(key) {
+            document.getElementById('continueScreen').classList.add('hidden');
+            document.getElementById('keyScreen').classList.remove('hidden');
+            document.getElementById('keyDisplay').textContent = key;
 
-    // NORMAL PAGE LOAD
-    window.onload = () => {
-      const data = loadData();
-      if (data.lastKey && data[data.lastKey] && (Date.now() - data[data.lastKey] < DURATION)) {
-        showKeyScreen(data.lastKey);
-      } else {
-        startCountdown();
-      }
-    };
-  </script>
+            const data = loadData();
+            const start = data.generationTime || Date.now();
+
+            function updateTimer() {
+                const elapsed = Date.now() - start;
+                const left = DURATION - elapsed;
+                if (left <= 0) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    location.reload();
+                    return;
+                }
+                document.getElementById('timer').textContent = 'Time left: ' + formatTime(left);
+            }
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        function startCountdown() {
+            let seconds = 5;
+            const btn = document.getElementById('continueBtn');
+            const counter = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                seconds--;
+                counter.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    btn.classList.add('active');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Continue →';
+                }
+            }, 1000);
+        }
+
+        window.addEventListener('load', () => {
+            const data = loadData();
+            if (data.key && data.generationTime && (Date.now() - data.generationTime < DURATION)) {
+                showKeyScreen(data.key);
+                return;
+            }
+
+            startCountdown();
+            document.getElementById('continueBtn').onclick = () => {
+                window.open(LOOT_LINK, '_blank');
+                setTimeout(() => {
+                    let used = data.usedKeys || [];
+                    const available = ALL_KEYS.filter(k => !used.includes(k));
+                    if (available.length === 0) {
+                        alert('All keys claimed! Contact owner.');
+                        return;
+                    }
+                    const newKey = available[Math.floor(Math.random() * available.length)];
+                    used.push(newKey);
+                    const newData = { key: newKey, generationTime: Date.now(), usedKeys: used };
+                    saveData(newData);
+                    showKeyScreen(newKey);
+                }, 3000);
+            };
+        });
+    </script>
 </body>
 </html>
