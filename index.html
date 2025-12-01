@@ -32,7 +32,6 @@
     <h1>ZAPORIUM</h1>
     <p class="subtitle">Exclusive Access Key System</p>
 
-    <!-- CONTINUE SCREEN -->
     <div id="continueScreen">
       <p class="desc">
         Click continue after the timer.<br>
@@ -44,15 +43,14 @@
       <div class="timer">Please wait...</div>
     </div>
 
-    <!-- KEY SCREEN -->
     <div id="keyScreen" class="hidden">
       <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
       <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
       <div class="timer" id="timer">Time left: 23:59:59</div>
       <p class="success">Valid for 24 hours • Do not share</p>
       <div class="links">
-        <a href="https://youtube.com" target="_blank">YouTube</a>
-        <a href="https://discord.gg" target="_blank">Discord</a>
+        <a href="https://youtube.com/@yourchannel" target="_blank">YouTube</a>
+        <a href="https://discord.gg/yourinvite" target="_blank">Discord</a>
       </div>
       <p class="footer">© 2025 Zaporium Hub</p>
     </div>
@@ -61,7 +59,7 @@
   </div>
 
   <script>
-    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
+    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq"; // ← your loot link
     const ALL_KEYS = [
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
@@ -73,13 +71,12 @@
       "ZAP-APEX2025-ULTIMA7-KEY006","ZAP-ZENITH9-ABYSS25-KEY007","ZAP-INFINITE7-ETERNAL9-KEY008",
       "ZAP-COSMIC25-NEBULA9-KEY009","ZAP-STELLAR7-GALAXY9-KEY010","ZAP-LUNAR999-SOLAR777-KEY011",
       "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
-    // ← add more keys here anytime
     ];
 
-    const STORAGE_KEY = 'zaporium_data_v5';
-    const DURATION = 24 * 60 * 60 * 1000; // 24 hours
+    const STORAGE_KEY = 'zaporium_data_v6';
+    const DURATION = 24 * 60 * 60 * 1000;
 
-    function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
     function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
     function formatTime(ms) {
       let h = Math.floor(ms/3600000).toString().padStart(2,'0');
@@ -96,40 +93,35 @@
       setTimeout(() => n.classList.remove('show'), 2000);
     }
 
-    // THIS IS THE FIXED showKeyScreen WITH REAL 24H EXPIRY
     function showKeyScreen(key) {
       document.getElementById('continueScreen').classList.add('hidden');
       document.getElementById('keyScreen').classList.remove('hidden');
       document.getElementById('keyDisplay').textContent = key;
 
-      // Save key + exact creation time so validate.txt knows when it expires
-      const allData = loadData();
-      allData[key] = Date.now();  // ← this line makes it really expire after 24h
-      saveData(allData);
+      const data = loadData();
+      data[key] = Date.now(); // save exact creation time
+      data.lastKey = key;
+      saveData(data);
 
       const start = Date.now();
-      function updateTimer() {
+      const timer = () => {
         const left = DURATION - (Date.now() - start);
-        if (left <= 0) {
-          localStorage.removeItem(STORAGE_KEY);
-          location.reload();
-          return;
-        }
+        if (left <= 0) { localStorage.removeItem(STORAGE_KEY); location.reload(); return; }
         document.getElementById('timer').textContent = 'Time left: ' + formatTime(left);
-      }
-      updateTimer();
-      setInterval(updateTimer, 1000);
+      };
+      timer();
+      setInterval(timer, 1000);
     }
 
     function startCountdown() {
-      let seconds = 5;
+      let sec = 5;
       const btn = document.getElementById('continueBtn');
-      const counter = document.getElementById('countdown');
-      const timer = setInterval(() => {
-        seconds--;
-        counter.textContent = seconds;
-        if (seconds <= 0) {
-          clearInterval(timer);
+      const cnt = document.getElementById('countdown');
+      const int = setInterval(() => {
+        sec--;
+        cnt.textContent = sec;
+        if (sec <= 0) {
+          clearInterval(int);
           btn.classList.add('active');
           btn.disabled = false;
           btn.innerHTML = 'Continue →';
@@ -137,56 +129,53 @@
       }, 1000);
     }
 
-    // LOOTLABS SUCCESS DETECTION (anti-bypass)
-    window.addEventListener('focus', () => {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('loot') === 'success') {
-        let data = loadData();
-        let used = data.usedKeys || [];
-        const available = ALL_KEYS.filter(k => !used.includes(k));
-        if (available.length === 0) { alert('All keys claimed!'); return; }
+    // THIS FIXES THE "CONTINUE AGAIN" BUG
+    document.getElementById('continueBtn').onclick = () => {
+      const callback = location.origin + location.pathname + '?loot=success';
+      const lootUrl = LOOT_LINK + '&callback=' + encodeURIComponent(callback);
+      window.open(lootUrl, '_blank');
 
-        const newKey = available[Math.floor(Math.random() * available.length)];
-        used.push(newKey);
+      document.querySelector('.timer').textContent = 'Finish all offers in the new tab, then come back here...';
+      document.getElementById('continueBtn').style.display = 'none';
+    };
+
+    // AUTO GIVE KEY WHEN USER COMES BACK FROM LOOTLABS
+    if (location.search.includes('loot=success')) {
+      const data = loadData();
+      let used = data.usedKeys || [];
+      const available = ALL_KEYS.filter(k => !used.includes(k));
+      if (available.length > 0) {
+        const key = available[Math.floor(Math.random() * available.length)];
+        used.push(key);
         data.usedKeys = used;
         saveData(data);
-
-        showKeyScreen(newKey);
-        history.replaceState({}, '', window.location.pathname);
+        showKeyScreen(key);
       }
-    });
-
-    // VALIDATE.TXT HANDLER — THIS MAKES KEYS REALLY EXPIRE AFTER 24H
-    if (window.location.pathname.includes('validate.txt')) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const requestedKey = urlParams.get('key');
-      if (requestedKey) {
-        const data = loadData();
-        const createdTime = data[requestedKey];
-        const isValid = createdTime && (Date.now() - createdTime < DURATION);
-        document.body.innerHTML = isValid ? 'VALID' : 'INVALID';
-        document.body.style = 'margin:0;padding:20px;font-family:monospace;background:#000;color:#0f0;';
-        // Stops browser from caching the response
-        document.querySelector('meta[http-equiv]') || document.head.insertAdjacentHTML('beforeend', '<meta http-equiv="Cache-Control" content="no-cache">');
-      }
-      // Stop the rest of the page from loading
-      throw new Error('validate.txt mode');
+      history.replaceState({}, '', location.pathname); // clean URL
     }
 
-    window.addEventListener('load', () => {
-      const data = loadData();
-      if (data.key && data[data.key] && (Date.now() - data[data.key] < DURATION)) {
-        showKeyScreen(data.key);
-        return;
+    // 24-HOUR VALIDATION FOR LOADER.LUA
+    if (location.pathname.includes('validate.txt')) {
+      const key = new URLSearchParams(location.search).get('key');
+      if (key) {
+        const data = loadData();
+        const time = data[key];
+        const valid = time && (Date.now() - time < DURATION);
+        document.body.innerHTML = valid ? 'VALID' : 'INVALID';
+        document.body.style = 'margin:0;padding:20px;font-family:monospace;background:#000;color:#0f0;';
       }
+      throw ''; // stop normal page
+    }
 
-      startCountdown();
-      document.getElementById('continueBtn').onclick = () => {
-        window.open(LOOT_LINK + '&callback=' + encodeURIComponent(window.location.origin + window.location.pathname + '?loot=success'), '_blank');
-        document.querySelector('.timer').textContent = 'Complete the steps in the new tab, then come back here...';
-        document.getElementById('continueBtn').style.display = 'none';
-      };
-    });
+    // NORMAL PAGE LOAD
+    window.onload = () => {
+      const data = loadData();
+      if (data.lastKey && data[data.lastKey] && (Date.now() - data[data.lastKey] < DURATION)) {
+        showKeyScreen(data.lastKey);
+      } else {
+        startCountdown();
+      }
+    };
   </script>
 </body>
 </html>
