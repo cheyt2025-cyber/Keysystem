@@ -10,14 +10,14 @@
     .container{background:#111;padding:40px 20px;border-radius:8px;border:1px solid #333;text-align:center;max-width:90%;box-sizing:border-box}
     h1{font-size:2rem;margin:0 0 10px;color:#fff;font-weight:500}
     .subtitle{color:#ccc;margin-bottom:30px;font-size:1rem}
-    .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#0f0}
+    .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#fff}
     .copy-btn{background:#007bff;color:#fff;border:none;padding:12px 30px;font-size:1rem;border-radius:4px;cursor:pointer;margin:10px;transition:.3s}
     .copy-btn:hover{background:#0056b3}
-    .continue-btn{background:#333;color:#666;border:none;padding:15px 40px;font-size:1.2rem;border-radius:4px;cursor:not-allowed;margin:20px auto;display:block;width:80%;max-width:300px}
-    .continue-btn.active{background:#00ff00;color:#000;cursor:pointer}
-    .continue-btn.active:hover{background:#00cc00}
-    .timer{color:#00ff00;font-size:1.1rem;margin:15px 0;font-weight:bold}
-    .success{color:#28a745;margin:15px 0}
+    .continue-btn{background:#444;color:#888;border:none;padding:15px 40px;font-size:1.2rem;border-radius:4px;cursor:not-allowed;margin:20px auto;display:block;width:80%;max-width:300px;transition:.3s}
+    .continue-btn.active{background:#ffffff;color:#000;cursor:pointer;font-weight:bold}
+    .continue-btn.active:hover{background:#e0e0e0}
+    .timer{color:#fff;font-size:1.1rem;margin:15px 0;font-weight:bold}
+    .success{color:#aaa;margin:15px 0}
     .desc{color:#aaa;font-size:0.9rem;line-height:1.4;margin:20px 0}
     .links a{color:#007bff;margin:0 10px;text-decoration:none;font-size:0.9rem}
     .footer{margin-top:20px;font-size:0.8rem;color:#666}
@@ -60,7 +60,7 @@
   </div>
 
   <script>
-    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq"; // Your LootLabs link
+    const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
     const ALL_KEYS = [
       "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
       "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
@@ -71,12 +71,11 @@
       "ZAP-PHOENIX9-REBORN25-KEY004","ZAP-SHADOWX-LIGHT9-CORE002","ZAP-TITAN777-MEGA9-KEY005",
       "ZAP-APEX2025-ULTIMA7-KEY006","ZAP-ZENITH9-ABYSS25-KEY007","ZAP-INFINITE7-ETERNAL9-KEY008",
       "ZAP-COSMIC25-NEBULA9-KEY009","ZAP-STELLAR7-GALAXY9-KEY010","ZAP-LUNAR999-SOLAR777-KEY011",
-      // ... (all your 100 keys here — I shortened for space, paste the full list)
       "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
     ];
 
     const STORAGE_KEY = 'zaporium_data_v2';
-    const DURATION = 24 * 60 * 60 * 1000; // 24 hours
+    const DURATION = 24 * 60 * 60 * 1000;
 
     function saveData(data) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -144,20 +143,16 @@
     window.addEventListener('load', () => {
       const data = loadData();
 
-      // If user already has a valid key → show it immediately
       if (data.key && data.generationTime && (Date.now() - data.generationTime < DURATION)) {
         showKeyScreen(data.key);
         return;
       }
 
-      // Otherwise show continue screen + 5-second countdown
       startCountdown();
 
       document.getElementById('continueBtn').onclick = () => {
-        // Open LootLabs in new tab
         window.open(LOOT_LINK, '_blank');
 
-        // Generate key after user probably finished ads
         setTimeout(() => {
           let used = data.usedKeys || [];
           const available = ALL_KEYS.filter(k => !used.includes(k));
@@ -177,7 +172,7 @@
           };
           saveData(newData);
           showKeyScreen(newKey);
-        }, 3000); // 3 seconds after clicking (feel free to increase)
+        }, 3000);
       };
     });
   </script>
