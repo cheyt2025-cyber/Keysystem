@@ -92,6 +92,7 @@
             transition: opacity .4s;
         }
         #notify.show { opacity: 1; }
+        #waitingText { color: #0f0; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -103,12 +104,19 @@
         <div id="continueScreen">
             <p class="desc">
                 Click continue after the timer.<br>
-                Ads may appear — they support the project.
+                Complete the steps on the next page to get your key.
             </p>
             <button class="continue-btn" id="continueBtn" disabled>
                 Continue (<span id="countdown">5</span>s)
             </button>
             <div class="timer">Please wait...</div>
+        </div>
+
+        <!-- WAITING SCREEN (shown after clicking Continue) -->
+        <div id="waitingScreen" class="hidden">
+            <p class="desc">Complete the offers in the new tab...</p>
+            <div id="waitingText">Waiting for completion ✔️</div>
+            <div class="timer">Do not close this page</div>
         </div>
 
         <!-- KEY DASHBOARD -->
@@ -129,6 +137,9 @@
 
     <script>
         const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq";
+        const CALLBACK_PARAM = "&callback=true"; // some walls need this, most work without
+        const FULL_LOOT_URL = LOOT_LINK + CALLBACK_PARAM;
+
         const ALL_KEYS = [
             "ZAP-1A2B3C-4D5E6F-G7H8I9","ZAP-9X8K7M-3N2P1Q-W4E5R6","ZAP-7V6B5N-4M3L2K-J1H9G8",
             "ZAP-5T4R3E-2W1QA9-S8D7F6","ZAP-CHEYT25-WIN99X-ELITE1","ZAP-NEON404-CYBER9-XMAS25",
@@ -141,6 +152,7 @@
             "ZAP-COSMIC25-NEBULA9-KEY009","ZAP-STELLAR7-GALAXY9-KEY010","ZAP-LUNAR999-SOLAR777-KEY011",
             "ZAP-FINAL25-ULTIMATE9-KEY099","ZAP-ABSOLUTE25-KEY100"
         ];
+
         const STORAGE_KEY = 'zaporium_data_v2';
         const DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -164,12 +176,26 @@
             setTimeout(() => n.classList.remove('show'), 2000);
         }
 
-        function showKeyScreen(key) {
-            document.getElementById('continueScreen').classList.add('hidden');
-            document.getElementById('keyScreen').classList.remove('hidden');
-            document.getElementById('keyDisplay').textContent = key;
+        function giveKey() {
+            let data = loadData();
+            let used = data.usedKeys || [];
+            const available = ALL_KEYS.filter(k => !used.includes(k));
+            if (available.length === 0) {
+                alert('All keys claimed! Contact owner.');
+                return;
+            }
+            const newKey = available[Math.floor(Math.random() * available.length)];
+            used.push(newKey);
+            const newData = { key: newKey, generationTime: Date.now(), usedKeys: used };
+            saveData(newData);
 
-            const start = loadData().generationTime || Date.now();
+            // Show key screen
+            document.getElementById('waitingScreen').classList.add('hidden');
+            document.getElementById('keyScreen').classList.remove('hidden');
+            document.getElementById('keyDisplay').textContent = newKey;
+
+            // Timer
+            const start = Date.now();
             function updateTimer() {
                 const left = DURATION - (Date.now() - start);
                 if (left <= 0) {
@@ -183,34 +209,20 @@
             setInterval(updateTimer, 1000);
         }
 
-        function generateAndShowKey() {
-            let data = loadData();
-            let used = data.usedKeys || [];
-            const available = ALL_KEYS.filter(k => !used.includes(k));
+        // Listen for success message from LootLabs
+        window.addEventListener('message', (event) => {
+            // Optional: check origin if you want to be strict
+            // if (event.origin !== "https://lootdest.org") return;
 
-            if (available.length === 0) {
-                alert('All keys have been claimed! Contact the owner for more.');
-                return;
+            if (event.data === "lootlabs_success" || event.data === "success") {
+                giveKey();
             }
+        });
 
-            const newKey = available[Math.floor(Math.random() * available.length)];
-            used.push(newKey);
-
-            const newData = {
-                key: newKey,
-                generationTime: Date.now(),
-                usedKeys: used
-            };
-            saveData(newData);
-            showKeyScreen(newKey);
-        }
-
-        // Countdown timer
         function startCountdown() {
             let seconds = 5;
             const btn = document.getElementById('continueBtn');
             const counter = document.getElementById('countdown');
-
             const timer = setInterval(() => {
                 seconds--;
                 counter.textContent = seconds;
@@ -218,32 +230,53 @@
                     clearInterval(timer);
                     btn.classList.add('active');
                     btn.disabled = false;
-                    btn.textContent = 'Continue →';
+                    btn.innerHTML = 'Continue →';
                 }
             }, 1000);
         }
 
         window.addEventListener('load', () => {
             const data = loadData();
-
-            // If user already has a valid key → show it immediately
             if (data.key && data.generationTime && (Date.now() - data.generationTime < DURATION)) {
-                showKeyScreen(data.key);
+                // User already has a valid key → show it directly
+                document.getElementById('continueScreen').classList.add('hidden');
+                document.getElementById('keyScreen').classList.remove('hidden');
+                document.getElementById('keyDisplay').textContent = data.key;
+
+                const start = data.generationTime;
+                function updateTimer() {
+                    const left = DURATION - (Date.now() - start);
+                    if (left <= 0) {
+                        localStorage.removeItem(STORAGE_KEY);
+                        location.reload();
+                        return;
+                    }
+                    document.getElementById('timer').textContent = 'Time left: ' + formatTime(left);
+                }
+                updateTimer();
+                setInterval(updateTimer, 1000);
                 return;
             }
 
-            // Otherwise show countdown
             startCountdown();
 
-            // When user clicks Continue
             document.getElementById('continueBtn').onclick = () => {
-                if (!document.getElementById('continueBtn').classList.contains('active')) return;
+                // Switch to waiting screen
+                document.getElementById('continueScreen').classList.add('hidden');
+                document.getElementById('waitingScreen').classList.remove('hidden');
 
                 // Open LootLabs in new tab
-                window.open(LOOT_LINK, '_blank');
+                const lootTab = window.open(FULL_LOOT_URL, '_blank');
 
-                // Immediately generate and show key in current tab
-                generateAndShowKey();
+                // Fallback: if user closes tab without completing (rarely needed)
+                // Some people block popups, so we show a message
+                if (!lootTab || lootTab.closed) {
+                    setTimeout(() => {
+                        if (document.getElementById('waitingScreen').classList.contains('hidden') === false) {
+                            document.getElementById('waitingText').innerHTML = "Tab blocked or closed.<br>Please allow popups and try again.";
+                        }
+                    }, 2000);
+                }
             };
         });
     </script>
