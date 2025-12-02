@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Zaporium Key</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;五百&display=swap');
         body{margin:0;height:100vh;background:#000;color:#fff;font-family:'Orbitron',sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden}
         .container{background:#111;padding:40px 20px;border-radius:8px;border:1px solid #333;text-align:center;max-width:90%;box-sizing:border-box}
         h1{font-size:2rem;margin:0 0 10px;font-weight:500}
@@ -13,14 +13,9 @@
         .key-box{background:#222;padding:15px;border:1px solid #444;border-radius:4px;margin:20px 0;font-size:1.2rem;letter-spacing:1px;word-break:break-all;color:#fff}
         .copy-btn{background:#007bff;color:#fff;border:none;padding:12px 30px;font-size:1rem;border-radius:4px;cursor:pointer;margin:10px;transition:.3s}
         .copy-btn:hover{background:#0056b3}
-        .copy-btn:disabled{background:#3a78d1;cursor:not-allowed;opacity:.6}
         .continue-btn{background:#444;color:#888;border:none;padding:15px 40px;font-size:1.2rem;border-radius:4px;cursor:not-allowed;margin:20px auto;display:block;width:80%;max-width:300px;transition:.3s}
         .continue-btn.active{background:#fff;color:#000;cursor:pointer;font-weight:bold}
         .timer{color:#fff;font-size:1.1rem;margin:15px 0;font-weight:bold}
-        .success{color:#aaa;margin:15px 0}
-        .desc{color:#aaa;font-size:0.9rem;line-height:1.4;margin:20px 0}
-        .links a{color:#007bff;margin:0 10px;text-decoration:none;font-size:0.9rem}
-        .footer{margin-top:20px;font-size:0.8rem;color:#666}
         .hidden{display:none}
         #notify{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#007bff;color:#fff;padding:12px 25px;border-radius:6px;z-index:9999;opacity:0;transition:opacity .4s}
         #notify.show{opacity:1}
@@ -32,68 +27,37 @@
         <p class="subtitle">Exclusive Access Key System</p>
 
         <div id="continueScreen">
-            <p class="desc">Click continue after the timer.<br>Ads may appear — they support the project.</p>
+            <p style="color:#aaa;font-size:0.9rem;line-height:1.4;margin:20px 0;">
+                Click continue after the timer.<br>Ads may appear — they support the project.
+            </p>
             <button class="continue-btn" id="continueBtn" disabled>Continue (<span id="countdown">5</span>s)</button>
-            <div class="timer">Please wait...</div>
         </div>
 
         <div id="keyScreen" class="hidden">
             <div id="keyDisplay" class="key-box">ZAP-XXXXX-XXXXX-XXXXX</div>
             <button class="copy-btn" id="copyBtn" onclick="copyKey()">COPY KEY</button>
             <div class="timer" id="timer">Time left: 23:59:59</div>
-            <p class="success">Valid for 24 hours • Do not share</p>
-            <div class="links">
-                <a href="#" target="_blank">YouTube</a>
-                <a href="#" target="_blank">Discord</a>
-            </div>
-            <p class="footer">© 2025 Zaporium Hub</p>
+            <p style="color:#aaa;margin:15px 0;">Valid for 24 hours • Do not share</p>
         </div>
 
         <div id="notify">Key copied!</div>
     </div>
 
     <script>
-        const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq"; // ← change this when you get a working shortener
+        const LOOT_LINK = "https://lootdest.org/s?ZS40VyJq"; // ← change to your real shortener
+        const KEYS_URL = "https://raw.githubusercontent.com/cheyt2025-cyber/Keysystem/main/keys.json";
         const STORAGE_KEY = "zaporium_data_v2";
         const DURATION = 24 * 60 * 60 * 1000;
+        let ALL_KEYS = [];
 
-        const ALL_KEYS = [
-    "ZAP-NEXUS001-ELITE2025-VIPX1","ZAP-NEXUS002-ELITE2025-VIPX2","ZAP-NEXUS003-ELITE2025-VIPX3",
-    "ZAP-NEXUS004-ELITE2025-VIPX4","ZAP-NEXUS005-ELITE2025-VIPX5","ZAP-NEXUS006-ELITE2025-VIPX6",
-    "ZAP-NEXUS007-ELITE2025-VIPX7","ZAP-NEXUS008-ELITE2025-VIPX8","ZAP-NEXUS009-ELITE2025-VIPX9",
-    "ZAP-NEXUS010-ELITE2025-VIP10","ZAP-QUASAR11-PROMAX25-XMAS1","ZAP-QUASAR12-PROMAX25-XMAS2",
-    "ZAP-QUASAR13-PROMAX25-XMAS3","ZAP-QUASAR14-PROMAX25-XMAS4","ZAP-QUASAR15-PROMAX25-XMAS5",
-    "ZAP-VORTEX16-LEGEND25-ALPHA","ZAP-VORTEX17-LEGEND25-BETA","ZAP-VORTEX18-LEGEND25-GAMMA",
-    "ZAP-VORTEX19-LEGEND25-DELTA","ZAP-VORTEX20-LEGEND25-EPSY","ZAP-OMEGA21-SECRET25-HACK1",
-    "ZAP-OMEGA22-SECRET25-HACK2","ZAP-OMEGA23-SECRET25-HACK3","ZAP-OMEGA24-SECRET25-HACK4",
-    "ZAP-OMEGA25-SECRET25-HACK5","ZAP-PHOENIX26-REBORN25-V1","ZAP-PHOENIX27-REBORN25-V2",
-    "ZAP-PHOENIX28-REBORN25-V3","ZAP-PHOENIX29-REBORN25-V4","ZAP-PHOENIX30-REBORN25-V5",
-    "ZAP-TITAN31-MEGA2025-X1","ZAP-TITAN32-MEGA2025-X2","ZAP-TITAN33-MEGA2025-X3",
-    "ZAP-TITAN34-MEGA2025-X4","ZAP-TITAN35-MEGA2025-X5","ZAP-APEX36-ULTIMA25-001",
-    "ZAP-APEX37-ULTIMA25-002","ZAP-APEX38-ULTIMA25-003","ZAP-APEX39-ULTIMA25-004",
-    "ZAP-APEX40-ULTIMA25-005","ZAP-ZENITH41-ABYSS25-V1","ZAP-ZENITH42-ABYSS25-V2",
-    "ZAP-ZENITH43-ABYSS25-V3","ZAP-ZENITH44-ABYSS25-V4","ZAP-ZENITH45-ABYSS25-V5",
-    "ZAP-INFINITY46-ETERNAL25-1","ZAP-INFINITY47-ETERNAL25-2","ZAP-INFINITY48-ETERNAL25-3",
-    "ZAP-INFINITY49-ETERNAL25-4","ZAP-INFINITY50-ETERNAL25-5","ZAP-COSMIC51-NEBULA25-X1",
-    "ZAP-COSMIC52-NEBULA25-X2","ZAP-COSMIC53-NEBULA25-X3","ZAP-COSMIC54-NEBULA25-X4",
-    "ZAP-COSMIC55-NEBULA25-X5","ZAP-STELLAR56-GALAXY25-01","ZAP-STELLAR57-GALAXY25-02",
-    "ZAP-STELLAR58-GALAXY25-03","ZAP-STELLAR59-GALAXY25-04","ZAP-STELLAR60-GALAXY25-05",
-    "ZAP-LUNAR61-SOLAR25-VIP1","ZAP-LUNAR62-SOLAR25-VIP2","ZAP-LUNAR63-SOLAR25-VIP3",
-    "ZAP-LUNAR64-SOLAR25-VIP4","ZAP-LUNAR65-SOLAR25-VIP5","ZAP-FINAL66-ULTIMATE25-X1",
-    "ZAP-FINAL67-ULTIMATE25-X2","ZAP-FINAL68-ULTIMATE25-X3","ZAP-FINAL69-ULTIMATE25-X4",
-    "ZAP-FINAL70-ULTIMATE25-X5","ZAP-ABSOLUTE71-KEY2025-01","ZAP-ABSOLUTE72-KEY2025-02",
-    "ZAP-ABSOLUTE73-KEY2025-03","ZAP-ABSOLUTE74-KEY2025-04","ZAP-ABSOLUTE75-KEY2025-05",
-    "ZAP-ETHEREAL76-GLITCH25-V1","ZAP-ETHEREAL77-GLITCH25-V2","ZAP-ETHEREAL78-GLITCH25-V3",
-    "ZAP-ETHEREAL79-GLITCH25-V4","ZAP-ETHEREAL80-GLITCH25-V5","ZAP-VOID81-PULSE25-001",
-    "ZAP-VOID82-PULSE25-002","ZAP-VOID83-PULSE25-003","ZAP-VOID84-PULSE25-004",
-    "ZAP-VOID85-PULSE25-005","ZAP-CRYPTIC86-MYSTIC25-X1","ZAP-CRYPTIC87-MYSTIC25-X2",
-    "ZAP-CRYPTIC88-MYSTIC25-X3","ZAP-CRYPTIC89-MYSTIC25-X4","ZAP-CRYPTIC90-MYSTIC25-X5",
-    "ZAP-ORACLE91-LEGACY25-VIP","ZAP-ORACLE92-LEGACY25-PRO","ZAP-ORACLE93-LEGACY25-ELITE",
-    "ZAP-ORACLE94-LEGACY25-ULT","ZAP-ORACLE95-LEGACY25-OMG","ZAP-SHADOW96-LIGHT25-CORE",
-    "ZAP-SH locali97-LIGHT25-PLUS","ZAP-SHADOW98-LIGHT25-MAX","ZAP-SHADOW99-LIGHT25-GOD",
-    "ZAP-SHADOW100-LIGHT25-999"
-
-        ];
+        async function loadKeys() {
+            try {
+                const res = await fetch(KEYS_URL + "?t=" + Date.now()); // cache buster
+                ALL_KEYS = await res.json();
+            } catch(e) {
+                alert("Failed to load keys! Check internet or contact owner.");
+            }
+        }
 
         function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
         function loadData() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
@@ -107,7 +71,7 @@
             navigator.clipboard.writeText(document.getElementById("keyDisplay").textContent);
             const n = document.getElementById("notify"); n.classList.add("show");
             setTimeout(() => n.classList.remove("show"), 2000);
-            document.getElementById("copyBtn").textContent = "Copied key"; document.getElementById("copyBtn").disabled = true;
+            document.getElementById("copyBtn").textContent = "Copied!";
         }
         function showKeyScreen(key) {
             document.getElementById("continueScreen").classList.add("hidden");
@@ -122,7 +86,7 @@
             }
             tick(); setInterval(tick, 1000);
         }
-        function generateKeyProperly() {
+        function generateKey() {
             const data = loadData();
             if (data.key && data.generationTime && (Date.now() - data.generationTime < DURATION)) {
                 showKeyScreen(data.key);
@@ -152,20 +116,25 @@
             }, 1000);
         }
 
-        window.addEventListener("load", () => {
+        window.addEventListener("load", async () => {
+            await loadKeys(); // ← load keys from keys.json first
             const url = new URL(window.location.href);
             const data = loadData();
 
-            if (url.searchParams.get("done") === "1" || data.key) {
+            if (url.searchParams.get("reward") === "1") {
                 history.replaceState(null, "", location.pathname);
-                generateKeyProperly();
+                generateKey();
+                return;
+            }
+
+            if (data.key && data.generationTime && (Date.now() - data.generationTime < DURATION)) {
+                showKeyScreen(data.key);
                 return;
             }
 
             startCountdown();
             document.getElementById("continueBtn").onclick = () => {
                 window.open(LOOT_LINK, "_blank");
-                location.replace(location.pathname + "?done=1");
             };
         });
     </script>
